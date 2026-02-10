@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>コーピングカフェ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Zen+Maru+Gothic:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-warm: #faf6f0;
+            --bg-cafe: #f5ede0;
+            --card-bg: #fffdf8;
+            --text-main: #4a3f35;
+            --text-sub: #8a7e72;
+            --text-light: #b5a99a;
+            --accent-warm: #c8856c;
+            --accent-green: #7faa8e;
+            --accent-coral: #e8a090;
+            --accent-mint: #a8d5c8;
+            --accent-cream: #f0dcc8;
+            --shadow-soft: 0 4px 20px rgba(74, 63, 53, 0.08);
+            --shadow-card: 0 8px 32px rgba(74, 63, 53, 0.1);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-warm);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+
+        .cafe-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 440px;
+            margin: 0 auto;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 0 20px;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            animation: screenFadeIn 0.6s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes screenFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #opening-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 60px;
+            padding-top: max(60px, env(safe-area-inset-top));
+        }
+
+        .cafe-illustration {
+            width: 100%;
+            max-width: 360px;
+            margin-bottom: 2rem;
+        }
+
+        .opening-title {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.08em;
+        }
+
+        .opening-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-warm), #d49580);
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(200, 133, 108, 0.35);
+            transition: var(--transition-smooth);
+            letter-spacing: 0.08em;
+            -webkit-appearance: none;
+        }
+
+        .start-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 3px 10px rgba(200, 133, 108, 0.3);
+        }
+
+        #mood-screen {
+            padding-top: 40px;
+            padding-top: max(40px, env(safe-area-inset-top));
+        }
+
+        .mood-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .barista-speech {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 20px 20px 20px 4px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-main);
+            animation: speechBubbleIn 0.5s ease;
+        }
+
+        .barista-speech::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 20px;
+            width: 16px;
+            height: 16px;
+            background: var(--card-bg);
+            transform: rotate(45deg);
+            box-shadow: -2px 2px 4px rgba(74, 63, 53, 0.04);
+        }
+
+        @keyframes speechBubbleIn {
+            from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .barista-name {
+            font-size: 0.8rem;
+            color: var(--accent-warm);
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .barista-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .mood-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .mood-btn {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-align: left;
+            -webkit-appearance: none;
+        }
+
+        .mood-btn:active {
+            transform: scale(0.98);
+        }
+
+        .mood-btn.selected {
+            border-color: var(--accent-warm);
+            background: linear-gradient(135deg, #fef8f4, #fdf0e8);
+        }
+
+        .mood-emoji {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .mood-text { flex: 1; }
+
+        .mood-text-main {
+            font-weight: 500;
+            margin-bottom: 0.15rem;
+        }
+
+        .mood-text-sub {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+        }
+
+        #chat-screen {
+            padding-top: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: 80px;
+            padding-bottom: max(80px, calc(env(safe-area-inset-bottom) + 60px));
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .chat-header-avatar { width: 36px; height: 36px; }
+
+        .chat-header-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .chat-header-status {
+            font-size: 0.7rem;
+            color: var(--accent-green);
+        }
+
+        .chat-back-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 8px;
+            -webkit-appearance: none;
+        }
+
+        .energy-bar-container {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 8px 14px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .energy-label {
+            font-size: 0.72rem;
+            color: var(--text-sub);
+            white-space: nowrap;
+        }
+
+        .energy-bar {
+            flex: 1;
+            height: 6px;
+            background: #e8e0d5;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .energy-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-coral), var(--accent-mint), var(--accent-green));
+            border-radius: 3px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 10%;
+        }
+
+        .energy-value {
+            font-size: 0.72rem;
+            color: var(--accent-warm);
+            font-weight: 500;
+            min-width: 24px;
+            text-align: right;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding-bottom: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.5rem;
+            max-width: 88%;
+            animation: messageIn 0.4s ease;
+        }
+
+        .message.barista { align-self: flex-start; }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .message-bubble {
+            padding: 0.8rem 1.1rem;
+            border-radius: 18px;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            position: relative;
+        }
+
+        .message.barista .message-bubble {
+            background: var(--card-bg);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06);
+            color: var(--text-main);
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--accent-warm), #d49580);
+            border-bottom-right-radius: 4px;
+            color: #fff;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.8rem 1.1rem;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-light);
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+
+        .chat-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding: 0.5rem 0;
+            animation: choicesIn 0.4s ease;
+        }
+
+        @keyframes choicesIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .choice-btn {
+            background: var(--card-bg);
+            border: 1.5px solid #e8ddd0;
+            border-radius: 14px;
+            padding: 0.9rem 1.2rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            -webkit-appearance: none;
+        }
+
+        .choice-btn:active {
+            transform: scale(0.98);
+            border-color: var(--accent-warm);
+            background: #fef8f4;
+        }
+
+        .choice-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .coping-card-inline {
+            background: linear-gradient(135deg, #fdfaf5, #f8f0e5);
+            border: 1.5px solid #e8ddd0;
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin: 0.3rem 0;
+        }
+
+        .coping-card-tag {
+            display: inline-block;
+            background: var(--accent-cream);
+            color: var(--accent-warm);
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 0.6rem;
+        }
+
+        .coping-card-text {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-main);
+        }
+
+        .coping-card-hint {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            margin-top: 0.6rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .coping-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.8rem;
+        }
+
+        .coping-action-btn {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            -webkit-appearance: none;
+        }
+
+        .coping-action-btn.execute {
+            background: linear-gradient(135deg, var(--accent-green), #6d9a7d);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(127, 170, 142, 0.3);
+        }
+
+        .coping-action-btn.execute:active { transform: scale(0.97); }
+
+        .coping-action-btn.skip {
+            background: #f0ebe3;
+            color: var(--text-sub);
+        }
+
+        .coping-action-btn.skip:active { transform: scale(0.97); }
+
+        .recovery-effect {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .recovery-particle {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .recovery-particle.active {
+            animation: particleRise 1.2s ease-out;
+        }
+
+        @keyframes particleRise {
+            0% { opacity: 0; transform: translateY(0) scale(0); }
+            20% { opacity: 0.8; transform: translateY(-20px) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(0.3); }
+        }
+
+        .recovery-number {
+            position: fixed;
+            top: 40%; left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent-green);
+            pointer-events: none;
+            z-index: 101;
+            opacity: 0;
+        }
+
+        .recovery-number.show {
+            animation: recoverNumberPop 1.2s ease;
+        }
+
+        @keyframes recoverNumberPop {
+            0% { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.5); }
+            30% { opacity: 1; transform: translateX(-50%) translateY(-20px) scale(1.2); }
+            60% { opacity: 1; transform: translateX(-50%) translateY(-30px) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(0.8); }
+        }
+
+        #summary-screen {
+            padding-top: 40px;
+            padding-top: max(40px, env(safe-area-inset-top));
+            align-items: center;
+            text-align: center;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 2rem 1.5rem;
+            box-shadow: var(--shadow-card);
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-stat { text-align: center; }
+
+        .summary-stat-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--accent-warm);
+        }
+
+        .summary-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-top: 0.2rem;
+        }
+
+        .summary-copings { text-align: left; margin-top: 1rem; }
+
+        .summary-coping-item {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f0ebe3;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-coping-check {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .summary-action-btn {
+            background: linear-gradient(135deg, var(--accent-warm), #d49580);
+            border: none;
+            padding: 0.9rem 2.5rem;
+            border-radius: 50px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(200, 133, 108, 0.3);
+            transition: var(--transition-smooth);
+            margin-top: 0.5rem;
+            -webkit-appearance: none;
+        }
+
+        .summary-action-btn:active { transform: scale(0.97); }
+
+        .summary-continue-btn {
+            background: var(--card-bg);
+            border: 1.5px solid #e8ddd0;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            color: var(--text-sub);
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            margin-top: 0.8rem;
+            -webkit-appearance: none;
+        }
+
+        .settings-btn {
+            position: fixed;
+            top: 16px;
+            top: max(16px, env(safe-area-inset-top));
+            right: 16px;
+            background: rgba(255, 253, 248, 0.9);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(74, 63, 53, 0.1);
+            z-index: 50;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-appearance: none;
+        }
+
+        .settings-btn:active { transform: scale(0.95); }
+
+        .settings-panel {
+            position: fixed;
+            top: 64px;
+            top: max(64px, calc(env(safe-area-inset-top) + 48px));
+            right: 16px;
+            background: rgba(255, 253, 248, 0.98);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.2rem;
+            box-shadow: var(--shadow-card);
+            display: none;
+            min-width: 220px;
+            z-index: 1000;
+        }
+
+        .settings-panel.show {
+            display: block;
+            animation: screenFadeIn 0.3s ease;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .setting-label {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px; height: 24px;
+            background: #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.on { background: var(--accent-green); }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: white;
+            top: 2px; left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .toggle.on::after { transform: translateX(20px); }
+
+        /* タップで進むインジケーター */
+        .tap-to-continue {
+            position: fixed;
+            bottom: 20px;
+            bottom: max(20px, calc(env(safe-area-inset-bottom) + 10px));
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(74, 63, 53, 0.7);
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.75rem;
+            padding: 6px 18px;
+            border-radius: 20px;
+            z-index: 90;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tap-to-continue.show {
+            opacity: 1;
+            animation: tapPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes tapPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        ::-webkit-scrollbar { display: none; }
+        body { scrollbar-width: none; }
+
+        .hidden { display: none !important; }
+
+        .steam { animation: steamRise 2s ease-in-out infinite; }
+
+        @keyframes steamRise {
+            0%, 100% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 0.6; transform: translateY(-3px); }
+        }
+
+        .lamp-glow { animation: lampGlow 3s ease-in-out infinite; }
+
+        @keyframes lampGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.9; }
+        }
+
+        .plant-sway {
+            animation: plantSway 4s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+
+        @keyframes plantSway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+<svg class="cafe-scene" viewBox="0 0 440 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="440" height="900" fill="#f5ede0"/>
+    <rect x="0" y="0" width="440" height="360" fill="#ede4d5" opacity="0.5"/>
+    <rect x="30" y="40" width="120" height="150" rx="4" fill="#c8e6d0" opacity="0.5"/>
+    <rect x="90" y="40" width="2" height="150" fill="#d4c8b8" opacity="0.6"/>
+    <rect x="30" y="110" width="120" height="2" fill="#d4c8b8" opacity="0.6"/>
+    <rect x="290" y="40" width="120" height="150" rx="4" fill="#c8e6d0" opacity="0.5"/>
+    <rect x="350" y="40" width="2" height="150" fill="#d4c8b8" opacity="0.6"/>
+    <rect x="290" y="110" width="120" height="2" fill="#d4c8b8" opacity="0.6"/>
+    <line x1="160" y1="0" x2="160" y2="80" stroke="#d4c8b8" stroke-width="1.5"/>
+    <path d="M140 80 Q160 75 180 80 L175 100 Q160 95 145 100 Z" fill="#e8a090" opacity="0.8"/>
+    <ellipse cx="160" cy="105" rx="18" ry="4" fill="#f5d0a0" opacity="0.3" class="lamp-glow"/>
+    <line x1="300" y1="0" x2="300" y2="70" stroke="#d4c8b8" stroke-width="1.5"/>
+    <path d="M282 70 L318 70 L312 90 L288 90 Z" fill="#c8b8a0" opacity="0.7"/>
+    <g class="plant-sway" transform="translate(20, 280)">
+        <circle cx="18" cy="30" r="15" fill="#a8d5c8" opacity="0.5"/>
+        <ellipse cx="12" cy="20" rx="8" ry="12" fill="#7faa8e" opacity="0.6"/>
+        <ellipse cx="24" cy="18" rx="7" ry="10" fill="#8fba9e" opacity="0.5"/>
+        <ellipse cx="18" cy="14" rx="6" ry="9" fill="#7faa8e" opacity="0.7"/>
+        <rect x="14" y="32" width="8" height="12" rx="2" fill="#c8b8a0"/>
+    </g>
+    <rect x="360" y="200" width="70" height="4" rx="2" fill="#d4c8b8" opacity="0.6"/>
+    <rect x="370" y="188" width="12" height="12" rx="2" fill="#e8ddd0"/>
+    <rect x="388" y="185" width="10" height="15" rx="1" fill="#c8e6d0" opacity="0.6"/>
+    <circle cx="408" cy="193" r="6" fill="#e8a090" opacity="0.4"/>
+    <rect x="0" y="360" width="440" height="540" fill="#ede4d5" opacity="0.3"/>
+    <ellipse cx="220" cy="380" rx="100" ry="20" fill="#d4c8b8" opacity="0.4"/>
+</svg>
+
+<div class="recovery-effect" id="recovery-effect"></div>
+<div class="recovery-number" id="recovery-number"></div>
+
+<div class="tap-to-continue" id="tap-indicator">タップして次へ</div>
+
+<button class="settings-btn" onclick="toggleSettings()">⚙</button>
+<div class="settings-panel" id="settings-panel">
+    <div class="setting-row">
+        <span class="setting-label">音声読み上げ</span>
+        <div class="toggle" id="voice-toggle" onclick="toggleSetting('voice')"></div>
+    </div>
+    <div class="setting-row">
+        <span class="setting-label">操作音</span>
+        <div class="toggle" id="sound-toggle" onclick="toggleSetting('sound')"></div>
+    </div>
+</div>
+
+<div class="app-container">
+
+    <div class="screen active" id="opening-screen">
+        <svg class="cafe-illustration" viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="180" cy="180" rx="110" ry="22" fill="#d4c8b8"/>
+            <ellipse cx="180" cy="176" rx="110" ry="22" fill="#e8ddd0"/>
+            <g transform="translate(120, 140)">
+                <rect x="0" y="10" width="30" height="22" rx="4" fill="#fffdf8" stroke="#d4c8b8" stroke-width="1"/>
+                <ellipse cx="15" cy="10" rx="15" ry="5" fill="#fffdf8" stroke="#d4c8b8" stroke-width="1"/>
+                <ellipse cx="15" cy="12" rx="10" ry="3" fill="#c8856c" opacity="0.3"/>
+                <path d="M30 18 Q38 18 38 24 Q38 30 30 30" stroke="#d4c8b8" fill="none" stroke-width="1"/>
+                <path class="steam" d="M10 6 Q12 0 10 -6" stroke="#d4c8b8" stroke-width="1" fill="none" opacity="0.5"/>
+                <path class="steam" d="M18 4 Q20 -2 18 -8" stroke="#d4c8b8" stroke-width="1" fill="none" opacity="0.4" style="animation-delay:0.5s"/>
+            </g>
+            <g transform="translate(210, 140)">
+                <rect x="0" y="10" width="30" height="22" rx="4" fill="#fffdf8" stroke="#d4c8b8" stroke-width="1"/>
+                <ellipse cx="15" cy="10" rx="15" ry="5" fill="#fffdf8" stroke="#d4c8b8" stroke-width="1"/>
+                <ellipse cx="15" cy="12" rx="10" ry="3" fill="#7faa8e" opacity="0.3"/>
+                <path d="M30 18 Q38 18 38 24 Q38 30 30 30" stroke="#d4c8b8" fill="none" stroke-width="1"/>
+                <path class="steam" d="M10 6 Q12 0 10 -6" stroke="#d4c8b8" stroke-width="1" fill="none" opacity="0.5" style="animation-delay:0.3s"/>
+                <path class="steam" d="M18 4 Q20 -2 18 -8" stroke="#d4c8b8" stroke-width="1" fill="none" opacity="0.4" style="animation-delay:0.8s"/>
+            </g>
+            <g transform="translate(90, 40)">
+                <circle cx="30" cy="30" r="22" fill="#e8a090"/>
+                <ellipse cx="30" cy="72" rx="22" ry="30" fill="#e8a090"/>
+                <circle cx="24" cy="28" r="2" fill="#4a3f35"/>
+                <circle cx="36" cy="28" r="2" fill="#4a3f35"/>
+                <path d="M25 36 Q30 40 35 36" stroke="#4a3f35" stroke-width="1.5" fill="none"/>
+            </g>
+            <g transform="translate(220, 45)">
+                <circle cx="30" cy="30" r="22" fill="#c8b8a0"/>
+                <ellipse cx="30" cy="72" rx="22" ry="30" fill="#c8b8a0"/>
+                <circle cx="24" cy="28" r="2" fill="#4a3f35"/>
+                <circle cx="36" cy="28" r="2" fill="#4a3f35"/>
+                <path d="M26 36 L34 36" stroke="#4a3f35" stroke-width="1.5" fill="none"/>
+            </g>
+            <g class="plant-sway" transform="translate(10, 120)">
+                <rect x="10" y="50" width="16" height="18" rx="3" fill="#c8b8a0"/>
+                <ellipse cx="18" cy="45" rx="14" ry="18" fill="#a8d5c8" opacity="0.7"/>
+                <ellipse cx="12" cy="38" rx="8" ry="12" fill="#7faa8e" opacity="0.8"/>
+                <ellipse cx="24" cy="40" rx="7" ry="10" fill="#8fba9e" opacity="0.7"/>
+            </g>
+            <line x1="140" y1="0" x2="140" y2="25" stroke="#d4c8b8" stroke-width="1.5"/>
+            <path d="M127 25 Q140 22 153 25 L150 38 Q140 35 130 38 Z" fill="#e8a090" opacity="0.7"/>
+            <ellipse cx="140" cy="40" rx="12" ry="3" fill="#f5d0a0" opacity="0.3" class="lamp-glow"/>
+            <line x1="240" y1="0" x2="240" y2="20" stroke="#d4c8b8" stroke-width="1.5"/>
+            <path d="M228 20 L252 20 L248 35 L232 35 Z" fill="#c8b8a0" opacity="0.6"/>
+        </svg>
+        <div class="opening-title">コーピングカフェ</div>
+        <div class="opening-subtitle" id="opening-subtitle">
+            いつもの席で、温かい飲み物を片手に。<br>今日もゆっくり話しましょう。
+        </div>
+        <button class="start-btn" onclick="startApp()">カフェに入る</button>
+    </div>
+
+    <div class="screen" id="mood-screen">
+        <div class="mood-header">
+            <svg class="barista-avatar" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="20" fill="#fdf0e8"/>
+                <circle cx="20" cy="16" r="10" fill="#e8a090"/>
+                <circle cx="16" cy="14" r="1.5" fill="#4a3f35"/>
+                <circle cx="24" cy="14" r="1.5" fill="#4a3f35"/>
+                <path d="M16 20 Q20 23 24 20" stroke="#4a3f35" stroke-width="1.2" fill="none"/>
+                <ellipse cx="20" cy="32" rx="12" ry="8" fill="#e8a090"/>
+            </svg>
+        </div>
+        <div class="barista-speech">
+            <div class="barista-name"><span>ハル</span></div>
+            <span>いらっしゃい。今日もよく来てくれたね。</span>
+        </div>
+        <div class="barista-speech" style="animation-delay:0.3s;">
+            <div class="barista-name"><span>ハル</span></div>
+            <span>今日はどんな感じ？</span>
+        </div>
+        <div class="mood-options">
+            <button class="mood-btn" onclick="selectMood('yabai')">
+                <span class="mood-emoji">😵‍💫</span>
+                <div class="mood-text"><div class="mood-text-main">正直、ヤバい</div><div class="mood-text-sub">心がいっぱいいっぱいで…</div></div>
+            </button>
+            <button class="mood-btn" onclick="selectMood('tired')">
+                <span class="mood-emoji">😮‍💨</span>
+                <div class="mood-text"><div class="mood-text-main">けっこう疲れてる</div><div class="mood-text-sub">今日はゆっくりしたい</div></div>
+            </button>
+            <button class="mood-btn" onclick="selectMood('energetic')">
+                <span class="mood-emoji">😊</span>
+                <div class="mood-text"><div class="mood-text-main">わりと元気！</div><div class="mood-text-sub">何か新しいことしたいかも</div></div>
+            </button>
+        </div>
+    </div>
+
+    <div class="screen" id="chat-screen">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <svg class="chat-header-avatar" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="20" fill="#fdf0e8"/>
+                    <circle cx="20" cy="16" r="10" fill="#e8a090"/>
+                    <circle cx="16" cy="14" r="1.5" fill="#4a3f35"/>
+                    <circle cx="24" cy="14" r="1.5" fill="#4a3f35"/>
+                    <path d="M16 20 Q20 23 24 20" stroke="#4a3f35" stroke-width="1.2" fill="none"/>
+                    <ellipse cx="20" cy="32" rx="12" ry="8" fill="#e8a090"/>
+                </svg>
+                <div>
+                    <div class="chat-header-name">ハル</div>
+                    <div class="chat-header-status">いつものカフェにて</div>
+                </div>
+            </div>
+            <button class="chat-back-btn" onclick="goToSummary()">おしまい</button>
+        </div>
+        <div class="energy-bar-container">
+            <span class="energy-label">元気度</span>
+            <div class="energy-bar"><div class="energy-bar-fill" id="energy-bar-fill"></div></div>
+            <span class="energy-value" id="energy-value">1</span>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+    </div>
+
+    <div class="screen" id="summary-screen">
+        <svg class="cafe-illustration" viewBox="0 0 360 160" xmlns="http://www.w3.org/2000/svg" style="max-width:280px;margin-bottom:1.5rem;">
+            <ellipse cx="180" cy="130" rx="80" ry="16" fill="#e8ddd0"/>
+            <g transform="translate(155,90)">
+                <rect x="0" y="10" width="26" height="20" rx="4" fill="#fffdf8" stroke="#d4c8b8" stroke-width="1"/>
+                <ellipse cx="13" cy="10" rx="13" ry="4.5" fill="#fffdf8" stroke="#d4c8b8" stroke-width="1"/>
+                <ellipse cx="13" cy="12" rx="8" ry="2.5" fill="#c8856c" opacity="0.3"/>
+            </g>
+            <g transform="translate(170,60)">
+                <path d="M10 18 Q10 10 5 6 Q0 2 -4 6 Q-6 9 -2 14 L10 26 L22 14 Q26 9 24 6 Q20 2 15 6 Q10 10 10 18Z" fill="#e8a090" opacity="0.5" transform="scale(0.7)"/>
+            </g>
+            <g transform="translate(240,70)">
+                <circle cx="15" cy="15" r="12" fill="#e8a090" opacity="0.8"/>
+                <circle cx="12" cy="13" r="1" fill="#4a3f35"/>
+                <circle cx="18" cy="13" r="1" fill="#4a3f35"/>
+                <path d="M12 18 Q15 20 18 18" stroke="#4a3f35" stroke-width="1" fill="none"/>
+            </g>
+        </svg>
+        <div class="summary-card">
+            <div class="summary-title">今日のセッション</div>
+            <div class="summary-stats">
+                <div class="summary-stat"><div class="summary-stat-value" id="summary-copings-count">0</div><div class="summary-stat-label">実行したコーピング</div></div>
+                <div class="summary-stat"><div class="summary-stat-value" id="summary-energy-change">+0</div><div class="summary-stat-label">元気度の変化</div></div>
+            </div>
+            <div class="summary-copings" id="summary-copings-list"></div>
+        </div>
+        <div class="barista-speech" style="width:100%;">
+            <div class="barista-name"><span>ハル</span></div>
+            <span id="summary-message">今日もよく頑張ったね。またいつでもおいでよ。</span>
+        </div>
+        <button class="summary-action-btn" onclick="resetApp()">また来る</button>
+        <button class="summary-continue-btn" onclick="continueChat()">もう少し話す</button>
+    </div>
+</div>
+
+<script>
+// ================================
+// データ
+// ================================
+const copingData = {
+    yabai: [
+        { text:"「今、ここ」を意識して、3分深呼吸する", hint:"鼻から4秒吸って、口から6秒吐く。それだけでいいんだ。", effect:2, follow:"呼吸に集中すると、頭の中のノイズが少し静かになるよ。" },
+        { text:"フェイクスマイルで、セロトニンを出す", hint:"脳は表情の筋肉から「今、笑ってる」と判断するらしいよ。", effect:1, follow:"最初は嘘でも、体は正直に反応してくれるんだ。" },
+        { text:"姿勢を正して、頭頂と丹田の軸を合わせる", hint:"頭のてっぺんから糸で吊られている感覚で。", effect:1, follow:"姿勢が変わるだけで、気持ちのスイッチが入ることがあるよ。" },
+        { text:"マイナスの情報を削除する。触れないようにする", hint:"SNSのミュート、ニュースアプリを閉じる、それだけでいい。", effect:2, follow:"情報を減らすのは逃げじゃなくて、自分を守る行動だよ。" },
+        { text:"「NO」を言って、境界線をはっきりさせる", hint:"全部を引き受けなくていい。断ることも大事なスキルだよ。", effect:2, follow:"自分の限界を知ってる人は、本当に強い人だと思う。" },
+        { text:"A4メモに書き出して、心を整える", hint:"頭の中にあるものを紙に出すと、びっくりするほど軽くなる。", effect:2, follow:"書くことは、自分との対話なんだ。" },
+        { text:"30秒スクワットとプランクをする", hint:"たった30秒。考えるより先に体を動かそう。", effect:2, follow:"体を動かすと、脳の「心配回路」が一時的にリセットされるんだ。" },
+        { text:"自分の心の中をチェックする。周りをよく見る", hint:"今、見えるもの5つ、聞こえるもの3つ、触れるもの1つ。", effect:1, follow:"これはグラウンディングっていう技法。パニックの時にすごく効くよ。" },
+        { text:"タイマーを30分にセットして、意識的に休憩をとる", hint:"「休む」と決めた30分は、ダラダラとは全然違う。", effect:1, follow:"計画的な休息は、最高の自己管理だよ。" },
+        { text:"鏡の前で自分を見て、しっかり褒めてあげる", hint:"「今日もここまで来た。えらい。」って、声に出してみて。", effect:2, follow:"自分を褒められる人は、他人も上手に褒められるようになるんだ。" },
+        { text:"シングルタスクに集中する。一つだけ。", hint:"マルチタスクは脳を疲れさせるだけ。今はこれだけ、と決めよう。", effect:1, follow:"一つのことに集中すると、実はそっちの方が速いんだよね。" },
+        { text:"「私は○○と思う」とアサーションする", hint:"「あなたが悪い」じゃなく「私はこう感じる」。それだけで世界が変わる。", effect:2, follow:"Iメッセージは、相手も自分も守る魔法の言い方だよ。" },
+        { text:"本当にそう？3人に聞いて落ち着いて判断する", hint:"思い込みかもしれない。別の視点を借りてみよう。", effect:1, follow:"一人で考えすぎると、どうしても視野が狭くなるからね。" },
+        { text:"動きをゆるめて、呼吸を整え、心を静める", hint:"急がなくていい。ゆっくり、ゆっくり。", effect:1, follow:"スローモーションのように動くだけで、副交感神経が優位になるよ。" },
+        { text:"「これは相手の問題」と割り切る", hint:"自分ばかり責めなくていい。全部が自分のせいじゃない。", effect:2, follow:"境界線を引くことは、冷たいことじゃなくて、健全なことだよ。" },
+        { text:"お気に入りのものを身につける", hint:"好きなアクセサリー、ハンカチ、なんでもいい。お守りみたいに。", effect:1, follow:"触れるだけで少し安心するもの、それって大事なアンカーなんだ。" },
+        { text:"なるようになるさ、と開き直る", hint:"コントロールできないことに、エネルギーを使わない。", effect:1, follow:"これ、実はスーパーハイレベルなコーピングなんだよ。受容って強さだから。" },
+        { text:"首を回しながら深呼吸する", hint:"ゆっくり右、ゆっくり左。呼吸と一緒に。", effect:1, follow:"首と肩には感情の緊張がたまりやすいんだ。" },
+        { text:"筋弛緩法をする", hint:"ぐーっと力を入れて、パッと抜く。それだけでOK。", effect:2, follow:"緊張と弛緩の差を体に教えると、リラックスの仕方を体が覚えるんだ。" },
+        { text:"「わくわくしてきた」とつぶやく", hint:"不安とワクワクは、体の反応がほぼ同じらしいよ。", effect:1, follow:"リフレーミングっていうんだ。同じ現象を別の角度から見る技術。" },
+        { text:"机の上を片付ける", hint:"外の世界を整えると、内側も少し整う。", effect:1, follow:"「部屋の乱れは心の乱れ」って、意外と科学的に正しいんだよ。" },
+        { text:"店員さんにありがとうを言う", hint:"小さな「ありがとう」が、自分の気持ちも温めてくれる。", effect:1, follow:"感謝の言葉を口にすると、脳内でオキシトシンが出るんだって。" },
+        { text:"苦手な人に近づかない", hint:"物理的に距離をとる。それも立派な戦略だよ。", effect:1, follow:"逃げることが最善手な時もある。サバイバルの基本だよ。" },
+        { text:"やらないことリストを作る", hint:"やることリストより、やらないことリストの方が大事かもしれない。", effect:1, follow:"引き算の発想って、疲れてる時には本当に救いになるよ。" },
+        { text:"笑顔であいさつする", hint:"「おはようございます」その一言から始めてみよう。", effect:1, follow:"挨拶は最小コストで最大効果のコミュニケーションだよ。" },
+        { text:"長い溜息をついて微笑む", hint:"はぁーーーっ…… そして、にこっ。", effect:1, follow:"溜息は体が自動的にやるリセット。意識的にやるともっと効果的。" },
+        { text:"セルフハグをする", hint:"両腕で自分を抱きしめて。最低20秒。", effect:2, follow:"自分で自分を抱きしめても、オキシトシンは出るんだよ。不思議だね。" },
+        { text:"「今日はこれでいい」と言ってあげる", hint:"完璧じゃなくていい。ここまでやった自分を認めよう。", effect:2, follow:"自己受容は、すべての回復の土台になるものだよ。" }
+    ],
+    tired: [
+        { text:"朝の一杯の水で、体の内側を目覚めさせる", hint:"寝ている間に体はコップ1杯分の水分を失っているんだ。", effect:1, follow:"水分補給は、一番シンプルで一番大事なセルフケアだよ。" },
+        { text:"線香の煙やアロマを嗅ぐ", hint:"嗅覚は感情に直結する特別な感覚。好きな香りを味方にしよう。", effect:1, follow:"香りの記憶は長く残る。いい香りは「安心の引き出し」になるよ。" },
+        { text:"真面目になりすぎず、気楽に息抜きしよう", hint:"100%を目指さなくていい。70%でも十分立派。", effect:1, follow:"完璧主義は、じつは体力を一番消耗するんだ。" },
+        { text:"散らかった場所を一つだけ片付ける", hint:"小さな達成感を積み重ねよう。全部じゃなくていい。一つだけ。", effect:1, follow:"「できた」という感覚が、次の一歩のエネルギーになるよ。" },
+        { text:"人への期待のハードルを思い切り下げる", hint:"期待が高いほど、失望も大きい。そっと下げてみよう。", effect:1, follow:"期待を下げるのは諦めじゃない。自分を守る知恵だよ。" },
+        { text:"ツボ押しをする（頭・目・耳・手のひら）", hint:"手のひらの中心を親指で押すだけでも、すごく気持ちいいよ。", effect:1, follow:"体には「リセットボタン」がたくさんあるんだ。" },
+        { text:"雨音やホワイトノイズを聴く", hint:"自然のノイズは、脳のアルファ波を増やしてくれる。", effect:1, follow:"静かすぎると逆に不安になる人も多いんだ。適度な音は味方だよ。" },
+        { text:"ティータイムをとって、心を落ち着ける", hint:"温かい飲み物を両手で包む。その温もりを感じて。", effect:1, follow:"「温かいものを持つ」だけで、人は心も温かく感じるんだって。" },
+        { text:"寝る前にできたことを3つ書く", hint:"どんな小さなことでもいい。「起きた」「水を飲んだ」でもOK。", effect:1, follow:"ポジティブ日記は、脳のネガティブバイアスを修正してくれるよ。" },
+        { text:"何も考えず、ただぼんやりする時間を作る", hint:"5分でいい。何もしない、を「する」。", effect:1, follow:"ぼんやりする時間に、脳は大事な整理作業をしてるんだ。" },
+        { text:"目を閉じて、両足の裏で大地を感じる", hint:"立ったまま、足の裏の感覚に意識を向けてみて。", effect:1, follow:"体の感覚に戻ると、頭の中のぐるぐるが止まりやすいんだ。" },
+        { text:"スープを作ってまったり飲む", hint:"インスタントでいいよ。温かくて、塩味があって、それだけで十分。", effect:1, follow:"料理は五感をフル活用するから、マインドフルネスの一種なんだ。" },
+        { text:"部屋の空気を入れ替える", hint:"窓を開けて、新しい空気を吸おう。1分でいい。", effect:1, follow:"新鮮な空気は、物理的に脳のパフォーマンスを上げてくれるよ。" },
+        { text:"ゆったりした服に着替える", hint:"体を締め付けるものを脱ぐだけで、ふわっと楽になる。", effect:1, follow:"服の締め付けって、無意識のストレス源なんだよね。" },
+        { text:"起きたら体を伸ばす", hint:"布団の中で大きく伸びをするだけでいい。うーんって。", effect:1, follow:"ストレッチは体を起こすスイッチ。朝の1分が一日を変えるよ。" },
+        { text:"お菓子を食べてゴロゴロする", hint:"たまにはそれでいい。罪悪感なしで。", effect:1, follow:"「楽しむ」ことも、立派なコーピングだから。" },
+        { text:"JAZZやローファイ音楽に身を委ねる", hint:"歌詞のない音楽は、感情を刺激しすぎず穏やかにしてくれる。", effect:1, follow:"音楽療法は、実際の医療現場でも使われているよ。" },
+        { text:"入浴で副交感モードに切り替え", hint:"38〜40℃のぬるめのお湯に、15分くらい。", effect:2, follow:"入浴後に体温が下がる時、自然と眠くなる。これが質の良い睡眠への入り口だよ。" },
+        { text:"30分早く寝る", hint:"たった30分。でもこの30分が明日の自分を変える。", effect:2, follow:"睡眠は最強の回復薬。どんなコーピングより効果的かもしれない。" },
+        { text:"携帯の電源をOFFにする", hint:"1時間だけでもいい。通知の音がない世界は意外と静か。", effect:1, follow:"デジタルデトックスは現代人に一番必要なコーピングかもね。" },
+        { text:"こまめに水を飲む", hint:"脱水は疲労感の原因になる。一口ずつでいいよ。", effect:1, follow:"2%の脱水で集中力が25%下がるって知ってた？" },
+        { text:"カモミールティーを飲む", hint:"就寝前にぴったり。カフェインフリーで安心。", effect:1, follow:"カモミールには実際にリラックス効果がある成分が含まれてるんだ。" },
+        { text:"小説を読んで感情に浸る", hint:"物語の世界に入ると、自分の悩みから少し離れられる。", effect:1, follow:"読書は6分で68%ストレスが減るっていう研究があるんだよ。" },
+        { text:"カカオチョコレートを食べる", hint:"高カカオがおすすめ。ポリフェノールがストレスを和らげてくれる。", effect:1, follow:"チョコレートは「心の薬」。でも、食べすぎ注意だね。" }
+    ],
+    energetic: [
+        { text:"30分だけゲームに没頭する", hint:"制限時間をつけるのがポイント。メリハリが大事。", effect:1, follow:"「計画的な楽しみ」は、無計画なダラダラとは全然違うものだよ。" },
+        { text:"自分の良いところをノートにまとめて見返す", hint:"誰かに褒められたこと、覚えてる？それを書いておこう。", effect:2, follow:"自分の長所リストは、落ち込んだ時の「非常持出袋」になるよ。" },
+        { text:"Googleマップでお気に入りのカフェを探す", hint:"行かなくてもいい。探すだけで小さな冒険。", effect:1, follow:"未来の楽しみを計画するだけで、今の気分が上がるんだ。" },
+        { text:"ウォーキングに出かける", hint:"20分歩くだけで、脳内にBDNFが分泌されて脳が活性化するよ。", effect:2, follow:"歩くことは「動く瞑想」とも言われるんだ。" },
+        { text:"サイクリングで風を感じる", hint:"風を切る感覚は、文字通り「気分転換」になる。", effect:2, follow:"有酸素運動は、抗うつ薬と同等の効果があるという研究もあるよ。" },
+        { text:"コーヒーを挽いて、香りを楽しむ", hint:"豆を挽く音と香り。五感が喜ぶ時間だよ。", effect:1, follow:"コーヒーの香りだけでもリラックス効果があるんだって。" },
+        { text:"外で好きな色を見つけて、その混色を考える", hint:"空の色、葉っぱの色。それを絵の具で作るとしたら？", effect:1, follow:"創造的な思考は、日常をちょっとした冒険に変えてくれるよ。" },
+        { text:"河原を散歩して、水の音を楽しむ", hint:"水の音は最も癒される自然音の一つだよ。", effect:2, follow:"自然の中で20分過ごすだけで、ストレスホルモンが下がる研究があるよ。" },
+        { text:"ベランダで朝ごはんを食べる", hint:"いつものご飯も、場所を変えるだけで特別になる。", effect:1, follow:"環境の変化は、脳に新しい刺激を与えてくれるんだ。" },
+        { text:"美術館や個展に行ってみる", hint:"静かな空間でアートと向き合う時間は贅沢だよ。", effect:1, follow:"アートに触れると、共感力や創造性が高まると言われているよ。" },
+        { text:"森林浴をする", hint:"木々の中を歩くだけ。フィトンチッドが体を癒してくれる。", effect:2, follow:"森林浴は日本発の健康法で、世界中で注目されてるんだよ。" },
+        { text:"花屋で花を買って、飾る", hint:"一輪でいい。部屋に生きている植物があるだけで違う。", effect:1, follow:"花を見ると、脳はリラックス状態になるんだ。" },
+        { text:"10分間太陽の光を浴びる", hint:"セロトニンの材料は日光。朝がベスト。", effect:1, follow:"太陽光は体内時計のリセットにも欠かせないよ。" },
+        { text:"好きな音楽のプレイリストを作る", hint:"気分や場面ごとにプレイリストを作ると楽しいよ。", effect:1, follow:"音楽を選ぶ行為自体が、自分の気持ちと向き合う作業なんだ。" },
+        { text:"絵を描いてみる", hint:"うまくなくていい。線を引いて、色を塗る。それだけ。", effect:1, follow:"創作活動は瞑想と同じ効果があるよ。フロー状態に入りやすいんだ。" },
+        { text:"行ったことのない街を観光する", hint:"隣駅でもいい。知らない景色は脳を若返らせる。", effect:2, follow:"新しい場所を探索することは、脳にとって最高のご褒美なんだ。" },
+        { text:"温泉に行く予定を立てる", hint:"実際に行かなくても、計画を立てるだけで楽しい。", effect:1, follow:"旅行の計画段階が、実は一番幸福度が高いっていう研究があるんだよ。" },
+        { text:"映画を一本観る", hint:"笑える映画がおすすめ。泣ける映画もカタルシス効果があるよ。", effect:1, follow:"物語に没入する時間は、脳のリフレッシュにとても効果的なんだ。" },
+        { text:"一人の時間を楽しむ", hint:"孤独と独りの時間は違う。これは豊かなソロタイム。", effect:1, follow:"自分と良い関係を築ける人は、他人とも良い関係が築けるんだ。" },
+        { text:"動物と触れ合う", hint:"ペットがいなくても、猫カフェや動物園でもOK。", effect:2, follow:"動物と触れ合うとオキシトシンが出る。お互いにね。" },
+        { text:"結果じゃなくステップを褒める", hint:"「できた」より「やろうとした」自分を認めよう。", effect:1, follow:"プロセスを評価する習慣は、挫折に強い心を育てるよ。" },
+        { text:"いらない服を捨てる", hint:"持ち物を減らすと、心も軽くなる不思議。", effect:1, follow:"物を手放す判断をすることが、決断力のトレーニングにもなるんだ。" }
+    ]
+};
+
+const baristaDialogues = {
+    yabai: {
+        intro:["そうか…大変だったね。無理しないで、ここでゆっくりしよう。","ヤバい時こそ、一つずつ。焦らなくていいよ。","話してくれてありがとう。一緒に少しずつ楽になる方法を探そう。"],
+        suggest:["こんなのはどうかな。試してみない？","これ、けっこう効果あるって話だよ。","簡単なやつだけど、意外とバカにできないんだ。"],
+        afterExecute:["やってみたんだ！えらいね。","一つできた。それだけで十分すごいよ。","少しでも楽になったかな？焦らなくていいからね。"],
+        afterSkip:["うん、気分じゃなかったかな。じゃあ別のを。","いいよ、合わないのは飛ばそう。自分に合うのを探そう。","パスも全然OK。他にもたくさんあるから。"],
+        moreChat:["もう少し話す？他にもこんなのがあるよ。","次はどうしようか。もう一つ試してみる？","いいペースだよ。もう一つどう？"]
+    },
+    tired: {
+        intro:["お疲れ様。今日も頑張ったんだね。ちょっと一息つこう。","疲れてる時は、小さなことから始めるのがいいんだ。","ここに来てくれただけでも、自分を大切にしてる証拠だよ。"],
+        suggest:["リラックスできそうなの、一つ提案するね。","これ、疲れてる時にちょうどいいと思うんだ。","穏やかなやつを選んでみたよ。"],
+        afterExecute:["いいね。少し力が抜けたかな？","できたね。無理せず、自分のペースでいいんだよ。","よくやった。自分を褒めてあげてね。"],
+        afterSkip:["了解。じゃあもっとゆったりしたやつにしようか。","今の気分に合うものを探そう。","大丈夫、他にもいろいろあるよ。"],
+        moreChat:["もう少しゆっくりしていく？","次は何にしようか。まだ時間はあるよ。","焦らずいこう。もう一つ見てみる？"]
+    },
+    energetic: {
+        intro:["お、今日は元気そうだね！いい感じ。","その元気、どこから来てるの？素敵だね。","元気な時にコーピングを身につけておくと、辛い時に助けになるよ。"],
+        suggest:["元気な今だからこそ、こんなのやってみない？","アクティブなやつ、いってみよう！","エネルギーがある時に試すと、効果倍増だよ。"],
+        afterExecute:["いいね！行動力あるなぁ。","やったね！その調子。","素晴らしい。元気な時のコーピングは記憶に残りやすいんだ。"],
+        afterSkip:["了解！じゃあもっとワクワクするやつを。","いいよ、好きなのを選ぼう。","次はきっとピンとくるよ。"],
+        moreChat:["まだまだいけそうだね！次は？","どんどんいこう！もう一つ？","この調子で、もう一つどう？"]
+    }
+};
+
+// ================================
+// 状態管理
+// ================================
+let currentMood = '';
+let energyLevel = 1;
+let initialEnergyLevel = 1;
+let executedCopings = [];
+let shuffleQueues = { yabai:[], tired:[], energetic:[] };
+let chatMessageCount = 0;
+let isProcessing = false;
+
+const settings = {
+    voice: localStorage.getItem('cafe-voice') !== 'false',
+    sound: localStorage.getItem('cafe-sound') !== 'false'
+};
+
+// ================================
+// タップで進む仕組み
+// ================================
+let tapResolve = null;       // 現在のタップ待ちのresolve関数
+let tapEnabled = false;      // タップ受付中かどうか
+let lastTapTime = 0;         // ダブルタップ防止用
+
+function waitForTap() {
+    return new Promise(resolve => {
+        tapResolve = resolve;
+        tapEnabled = true;
+        showTapIndicator(true);
+    });
+}
+
+function handleTapAdvance(e) {
+    if (!tapEnabled) return;
+
+    // ボタンや選択肢やリンクのタップは無視
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'button' || tag === 'a' || tag === 'input' || tag === 'select') return;
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.choice-btn') ||
+        e.target.closest('.coping-action-btn') || e.target.closest('.settings-panel') ||
+        e.target.closest('.settings-btn')) return;
+
+    // チャット画面でのみ動作
+    if (!document.getElementById('chat-screen').classList.contains('active')) return;
+
+    // ダブルタップ防止（400ms）
+    const now = Date.now();
+    if (now - lastTapTime < 400) return;
+    lastTapTime = now;
+
+    if (tapResolve) {
+        tapEnabled = false;
+        showTapIndicator(false);
+        const r = tapResolve;
+        tapResolve = null;
+        r();
+    }
+}
+
+function showTapIndicator(show) {
+    const el = document.getElementById('tap-indicator');
+    if (show) el.classList.add('show');
+    else el.classList.remove('show');
+}
+
+// タップイベント登録
+document.addEventListener('click', handleTapAdvance);
+
+// ================================
+// Audio（iOS対応）
+// ================================
+let audioCtx = null;
+
+function initAudio() {
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // iOS: resume on user gesture
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch(e) {}
+}
+
+function playTapSound() {
+    if (!settings.sound || !audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+}
+
+function playSuccessSound() {
+    if (!settings.sound || !audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    [523,659,784].forEach((freq,i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, audioCtx.currentTime + i*0.12);
+        gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + i*0.12 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i*0.12 + 0.3);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + i*0.12);
+        osc.stop(audioCtx.currentTime + i*0.12 + 0.3);
+    });
+}
+
+// ================================
+// 音声読み上げ（iOS完全対応版）
+// ================================
+let synth = window.speechSynthesis;
+let speechReady = false;
+let iosVoiceKickstarted = false;
+
+// iOS Safari: voiceschanged が遅れる & 空のutteranceでキックスタートが必要
+function prepareSpeech() {
+    if (!synth) return;
+    const voices = synth.getVoices();
+    if (voices.length > 0) speechReady = true;
+}
+
+if (synth) {
+    synth.onvoiceschanged = prepareSpeech;
+    prepareSpeech();
+}
+
+// iOS Safari: ユーザーインタラクション内で空のutteranceをspeakしてエンジンを起こす
+function kickstartIOSSpeech() {
+    if (iosVoiceKickstarted || !synth) return;
+    iosVoiceKickstarted = true;
+    const dummy = new SpeechSynthesisUtterance('');
+    dummy.volume = 0;
+    dummy.lang = 'ja-JP';
+    synth.speak(dummy);
+}
+
+/**
+ * iOS対応の音声読み上げ。
+ * - ユーザーインタラクション起点で呼ばれるため、iOSでもspeakが動作する。
+ * - iOSのonend未発火対策として、polling + タイムアウトの二重ガードを使用。
+ * - 長文は分割して読み上げ（iOS 15+で長文が途切れる問題の対策）。
+ */
+function speak(text) {
+    return new Promise(resolve => {
+        if (!settings.voice || !synth) { resolve(); return; }
+
+        synth.cancel();
+
+        const cleanText = text.replace(/<[^>]*>/g, '').replace(/◯◯/g,'まるまる').replace(/○○/g,'まるまる').trim();
+        if (!cleanText) { resolve(); return; }
+
+        // 長文を分割（40文字ごと、句読点で区切る）
+        const chunks = splitTextForIOS(cleanText);
+        let chunkIndex = 0;
+        let resolved = false;
+
+        const finish = () => {
+            if (!resolved) { resolved = true; resolve(); }
+        };
+
+        // 全体タイムアウト
+        const totalTimeout = setTimeout(finish, Math.max(3000, cleanText.length * 200));
+
+        function speakChunk() {
+            if (chunkIndex >= chunks.length || resolved) {
+                clearTimeout(totalTimeout);
+                finish();
+                return;
+            }
+
+            const chunk = chunks[chunkIndex];
+            chunkIndex++;
+
+            const utterance = new SpeechSynthesisUtterance(chunk);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            utterance.volume = 0.7;
+
+            const voices = synth.getVoices();
+            const ja = voices.find(v => v.lang.startsWith('ja'));
+            if (ja) utterance.voice = ja;
+
+            let chunkDone = false;
+            const chunkFinish = () => {
+                if (!chunkDone) {
+                    chunkDone = true;
+                    clearTimeout(chunkTimeout);
+                    clearInterval(chunkPoll);
+                    speakChunk(); // 次のチャンクへ
+                }
+            };
+
+            utterance.onend = chunkFinish;
+            utterance.onerror = chunkFinish;
+
+            // チャンクごとのタイムアウト
+            const chunkTimeout = setTimeout(chunkFinish, Math.max(2000, chunk.length * 200));
+
+            // iOS: speaking状態をポーリングで監視（onendが発火しない場合の対策）
+            const chunkPoll = setInterval(() => {
+                if (!synth.speaking && !synth.pending) {
+                    chunkFinish();
+                }
+            }, 200);
+
+            // iOS 15+: 長時間再生中にpauseされる問題の対策
+            // 定期的にresume()を呼ぶ
+            const resumeInterval = setInterval(() => {
+                if (synth.paused) synth.resume();
+                if (!synth.speaking) clearInterval(resumeInterval);
+            }, 5000);
+
+            utterance.onend = () => { clearInterval(resumeInterval); chunkFinish(); };
+            utterance.onerror = () => { clearInterval(resumeInterval); chunkFinish(); };
+
+            synth.speak(utterance);
+        }
+
+        speakChunk();
+    });
+}
+
+// テキストを読み上げ用チャンクに分割（句読点で区切り、最大40文字）
+function splitTextForIOS(text) {
+    if (text.length <= 40) return [text];
+
+    const chunks = [];
+    // 句読点で分割
+    const parts = text.split(/([。、！？\.\!\?])/);
+    let current = '';
+
+    for (let i = 0; i < parts.length; i++) {
+        current += parts[i];
+        // 句読点の後、またはバッファが40文字以上で区切る
+        if (current.length >= 35 || (i < parts.length - 1 && /[。！？\.\!\?]/.test(parts[i]))) {
+            if (current.trim()) chunks.push(current.trim());
+            current = '';
+        }
+    }
+    if (current.trim()) chunks.push(current.trim());
+
+    return chunks.length > 0 ? chunks : [text];
+}
+
+// ================================
+// ユーティリティ
+// ================================
+function shuffle(arr) {
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+}
+function randomPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ================================
+// 画面遷移
+// ================================
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+    // タップ待ちをキャンセル
+    if (tapResolve) { tapEnabled=false; showTapIndicator(false); tapResolve=null; }
+}
+
+function startApp() {
+    playTapSound();
+    kickstartIOSSpeech(); // iOS: ユーザーインタラクション内でspeechエンジンを起動
+    showScreen('mood-screen');
+}
+
+function selectMood(mood) {
+    if(isProcessing)return;
+    playTapSound();
+    kickstartIOSSpeech();
+    currentMood=mood;
+    if(mood==='yabai')energyLevel=1;else if(mood==='tired')energyLevel=3;else energyLevel=6;
+    initialEnergyLevel=energyLevel;
+    if(shuffleQueues[mood].length===0)shuffleQueues[mood]=shuffle(copingData[mood]);
+    document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    setTimeout(()=>{showScreen('chat-screen');updateEnergyBar();startChat();},400);
+}
+
+// ================================
+// チャット機能
+// ================================
+const avatarSVG=`<svg class="message-avatar" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#fdf0e8"/><circle cx="20" cy="16" r="10" fill="#e8a090"/><circle cx="16" cy="14" r="1.5" fill="#4a3f35"/><circle cx="24" cy="14" r="1.5" fill="#4a3f35"/><path d="M16 20 Q20 23 24 20" stroke="#4a3f35" stroke-width="1.2" fill="none"/><ellipse cx="20" cy="32" rx="12" ry="8" fill="#e8a090"/></svg>`;
+
+function clearChat(){document.getElementById('chat-messages').innerHTML='';chatMessageCount=0;}
+
+function addMessage(type, content, delayMs=0) {
+    return new Promise(async resolve => {
+        await delay(delayMs);
+        const container = document.getElementById('chat-messages');
+        const msg = document.createElement('div');
+        msg.className = `message ${type}`;
+
+        if (type==='barista') {
+            msg.innerHTML = `${avatarSVG}<div class="message-bubble">${content}</div>`;
+            container.appendChild(msg);
+            chatMessageCount++;
+            scrollToBottom();
+            await speak(content);
+            resolve();
+        } else if (type==='user') {
+            msg.innerHTML = `<div class="message-bubble">${content}</div>`;
+            container.appendChild(msg);
+            chatMessageCount++;
+            scrollToBottom();
+            resolve();
+        } else if (type==='coping') {
+            msg.style.maxWidth='92%';
+            msg.className='message barista';
+            msg.innerHTML = `${avatarSVG}<div>${content}</div>`;
+            container.appendChild(msg);
+            chatMessageCount++;
+            scrollToBottom();
+            resolve();
+        }
+    });
+}
+
+function addTypingIndicator() {
+    return new Promise(resolve => {
+        const container = document.getElementById('chat-messages');
+        const msg = document.createElement('div');
+        msg.className='message barista';msg.id='typing-indicator';
+        msg.innerHTML = `${avatarSVG}<div class="message-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+        container.appendChild(msg);scrollToBottom();resolve();
+    });
+}
+
+function removeTypingIndicator(){const el=document.getElementById('typing-indicator');if(el)el.remove();}
+
+function addChoices(choices) {
+    return new Promise(resolve => {
+        const container = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className='chat-choices';div.id='current-choices';
+        choices.forEach(c => {
+            const btn=document.createElement('button');
+            btn.className='choice-btn';
+            btn.innerHTML=`<span class="choice-icon">${c.icon||''}</span><span>${c.text}</span>`;
+            btn.onclick=()=>{playTapSound();div.remove();c.action();};
+            div.appendChild(btn);
+        });
+        container.appendChild(div);scrollToBottom();resolve();
+    });
+}
+
+function scrollToBottom(){setTimeout(()=>{window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});},100);}
+
+// ================================
+// 会話フロー（タップ進行 + 読み上げ完了待ち）
+// ================================
+async function startChat() {
+    clearChat();
+    isProcessing = true;
+
+    const dialogues = baristaDialogues[currentMood];
+    const intro = randomPick(dialogues.intro);
+
+    await addTypingIndicator();
+    await delay(1200);
+    removeTypingIndicator();
+
+    // イントロ表示 → 読み上げ完了を待つ
+    await addMessage('barista', intro);
+
+    // タップで次へ進む
+    await waitForTap();
+
+    await suggestCoping();
+}
+
+async function suggestCoping() {
+    isProcessing = true;
+    const dialogues = baristaDialogues[currentMood];
+
+    if (shuffleQueues[currentMood].length === 0) {
+        shuffleQueues[currentMood] = shuffle(copingData[currentMood]);
+    }
+    const coping = shuffleQueues[currentMood].shift();
+
+    await addTypingIndicator();
+    await delay(800);
+    removeTypingIndicator();
+
+    // 提案メッセージ → 読み上げ完了を待つ
+    await addMessage('barista', randomPick(dialogues.suggest));
+
+    // タップで次へ
+    await waitForTap();
+
+    // コーピングカード表示
+    const escapedCoping = JSON.stringify(coping).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+    const cardHTML = `
+        <div class="coping-card-inline">
+            <div class="coping-card-tag">${currentMood==='yabai'?'ヤバイとき':currentMood==='tired'?'疲れてるとき':'元気なとき'}</div>
+            <div class="coping-card-text">${coping.text}</div>
+            <div class="coping-card-hint">${coping.hint}</div>
+            <div class="coping-actions">
+                <button class="coping-action-btn execute" onclick="executeCoping(this)" data-coping='${JSON.stringify(coping).replace(/'/g,"&#39;")}'>やってみる</button>
+                <button class="coping-action-btn skip" onclick="skipCoping(this)" data-coping='${JSON.stringify(coping).replace(/'/g,"&#39;")}'>今はいいかな</button>
+            </div>
+        </div>`;
+    await addMessage('coping', cardHTML);
+
+    // コーピングテキストを読み上げ完了まで待つ
+    await speak(coping.text);
+
+    isProcessing = false;
+}
+
+async function executeCoping(btnEl) {
+    if (isProcessing) return;
+    isProcessing = true;
+    playSuccessSound();
+
+    const coping = JSON.parse(btnEl.getAttribute('data-coping'));
+
+    const card = btnEl.closest('.coping-card-inline');
+    card.querySelectorAll('.coping-action-btn').forEach(b=>{b.disabled=true;b.style.opacity='0.5';b.onclick=null;});
+    btnEl.textContent='✓ やった！';btnEl.style.opacity='1';
+
+    await addMessage('user','「'+coping.text.substring(0,20)+'…」やってみた！',300);
+
+    energyLevel=Math.min(10,energyLevel+coping.effect);
+    executedCopings.push(coping);
+    showRecoveryEffect(coping.effect);
+    updateEnergyBar();
+
+    const dialogues=baristaDialogues[currentMood];
+
+    await addTypingIndicator();
+    await delay(1000);
+    removeTypingIndicator();
+    await addMessage('barista',randomPick(dialogues.afterExecute));
+
+    // タップで次へ
+    await waitForTap();
+
+    if(coping.follow){
+        await addTypingIndicator();
+        await delay(1200);
+        removeTypingIndicator();
+        await addMessage('barista',coping.follow);
+
+        // タップで次へ
+        await waitForTap();
+    }
+
+    await addTypingIndicator();
+    await delay(600);
+    removeTypingIndicator();
+    await addMessage('barista',randomPick(dialogues.moreChat));
+
+    await addChoices([
+        {icon:'☕',text:'もう一つ試してみる',action:()=>suggestCoping()},
+        {icon:'🌙',text:'今日はこのへんで',action:()=>goToSummary()}
+    ]);
+    isProcessing=false;
+}
+
+async function skipCoping(btnEl) {
+    if(isProcessing)return;
+    isProcessing=true;
+    playTapSound();
+
+    const card=btnEl.closest('.coping-card-inline');
+    card.querySelectorAll('.coping-action-btn').forEach(b=>{b.disabled=true;b.style.opacity='0.5';b.onclick=null;});
+
+    await addMessage('user','今の気分じゃないかも',200);
+
+    const dialogues=baristaDialogues[currentMood];
+    await addTypingIndicator();
+    await delay(800);
+    removeTypingIndicator();
+    await addMessage('barista',randomPick(dialogues.afterSkip));
+
+    // タップで次へ
+    await waitForTap();
+
+    await suggestCoping();
+}
+
+// ================================
+// エネルギーバー & エフェクト
+// ================================
+function updateEnergyBar() {
+    const fill=document.getElementById('energy-bar-fill');
+    const val=document.getElementById('energy-value');
+    if(fill)fill.style.width=(energyLevel/10*100)+'%';
+    if(val)val.textContent=energyLevel;
+}
+
+function showRecoveryEffect(amount) {
+    const numEl=document.getElementById('recovery-number');
+    numEl.textContent='+'+amount;
+    numEl.classList.remove('show');void numEl.offsetWidth;numEl.classList.add('show');
+    setTimeout(()=>numEl.classList.remove('show'),1200);
+    const container=document.getElementById('recovery-effect');
+    const colors=['#7faa8e','#a8d5c8','#c8e6d0','#f5d0a0','#e8a090'];
+    for(let i=0;i<8*amount;i++){
+        const p=document.createElement('div');p.className='recovery-particle';
+        p.style.left=(40+Math.random()*20)+'%';p.style.top=(45+Math.random()*15)+'%';
+        p.style.background=colors[Math.floor(Math.random()*colors.length)];
+        p.style.animationDelay=(Math.random()*0.5)+'s';
+        container.appendChild(p);requestAnimationFrame(()=>p.classList.add('active'));
+        setTimeout(()=>p.remove(),1700);
+    }
+}
+
+// ================================
+// 振り返り
+// ================================
+function goToSummary() {
+    playTapSound();
+    synth.cancel();
+    document.getElementById('summary-copings-count').textContent=executedCopings.length;
+    const change=energyLevel-initialEnergyLevel;
+    document.getElementById('summary-energy-change').textContent=(change>=0?'+':'')+change;
+    const list=document.getElementById('summary-copings-list');list.innerHTML='';
+    executedCopings.forEach(c=>{
+        const item=document.createElement('div');item.className='summary-coping-item';
+        item.innerHTML=`<span class="summary-coping-check">✓</span><span>${c.text}</span>`;
+        list.appendChild(item);
+    });
+    const msgEl=document.getElementById('summary-message');
+    if(executedCopings.length===0)msgEl.textContent='今日はのんびりする日だったかな。それも大事な過ごし方だよ。またいつでもおいでね。';
+    else if(executedCopings.length<=2)msgEl.textContent='少しだけど、自分のために時間を使えたね。その積み重ねが大きな力になるよ。';
+    else msgEl.textContent='たくさんチャレンジしたね！今日の自分を褒めてあげて。またいつでも話そう。';
+    localStorage.setItem('cafe-last-date',new Date().toDateString());
+    localStorage.setItem('cafe-session-count',(parseInt(localStorage.getItem('cafe-session-count')||'0')+1).toString());
+    showScreen('summary-screen');
+}
+
+function continueChat(){playTapSound();showScreen('chat-screen');suggestCoping();}
+
+function resetApp(){
+    playTapSound();currentMood='';energyLevel=1;initialEnergyLevel=1;
+    executedCopings=[];chatMessageCount=0;clearChat();showScreen('opening-screen');
+}
+
+// ================================
+// 設定
+// ================================
+function toggleSettings(){document.getElementById('settings-panel').classList.toggle('show');}
+function toggleSetting(key){
+    settings[key]=!settings[key];
+    localStorage.setItem('cafe-'+key,settings[key]);
+    updateToggle(key+'-toggle',settings[key]);
+    if(key==='voice'&&!settings.voice)synth.cancel();
+}
+function updateToggle(id,on){const el=document.getElementById(id);if(on)el.classList.add('on');else el.classList.remove('on');}
+
+// ================================
+// 初期化
+// ================================
+window.addEventListener('load',()=>{
+    updateToggle('voice-toggle',settings.voice);
+    updateToggle('sound-toggle',settings.sound);
+
+    const hour=new Date().getHours();
+    const subtitle=document.getElementById('opening-subtitle');
+    if(hour>=5&&hour<12)subtitle.innerHTML='おはよう。朝のカフェでゆっくり過ごそう。<br>温かい一杯を用意してるよ。';
+    else if(hour>=12&&hour<18)subtitle.innerHTML='こんにちは。午後のカフェで一息つこう。<br>今日はどんな一日だった？';
+    else subtitle.innerHTML='おつかれさま。夜のカフェでほっと一息。<br>今日もよく頑張ったね。';
+
+    const count=parseInt(localStorage.getItem('cafe-session-count')||'0');
+    if(count>0)document.querySelector('.start-btn').textContent='いつもの席へ';
+
+    // iOS: 最初のタッチでAudioContextとSpeechを初期化
+    document.addEventListener('touchstart',function firstTouch(){
+        if(!audioCtx)initAudio();
+        kickstartIOSSpeech();
+        document.removeEventListener('touchstart',firstTouch);
+    },{once:true,passive:true});
+
+    document.addEventListener('click',()=>{if(!audioCtx)initAudio();},{once:true});
+});
+</script>
+</body>
+</html>
